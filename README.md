@@ -1,43 +1,30 @@
-```markdown
-# DeepSeek-R1 Medical Chain-of-Thought (CoT) Fine-Tuning Engine
 
-[![Framework](https://img.shields.io/badge/Framework-Unsloth-orange.svg)](https://github.com/unslothai/unsloth)
-[![Model](https://img.shields.io/badge/Model-DeepSeek--R1--Distill--Qwen--7B-blue.svg)](https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-7B)
-[![Dataset](https://img.shields.io/badge/Dataset-medical--o1--reasoning--sft-green.svg)](https://huggingface.co/datasets/FreedomIntelligence/medical-o1-reasoning-SFT)
-[![Read Article](https://img.shields.io/badge/Medium-Deep%20Dive-black.svg)](https://medium.com/@anicomanesh/fine-tuning-deepseek-r1-reasoning-on-the-medical-chain-of-thought-dataset-922407121cc2)
+# DeepSeek-R1 Medical Reasoning Fine-Tuning
 
-An industrial, production-grade alignment pipeline engineered to optimize **DeepSeek-R1-Distill-Qwen-7B** for advanced clinical diagnostics and reasoning. By steering away from monolithic notebook structures, this repository isolates dataset mapping, hyperparameter configurations, and tracking engines into a clean, modular layout built for enterprise scaling and reliable cloud deployment.
-
-> 📝 **Core Reference:** For a comprehensive exploration of the theoretical foundations behind this system—including the shift from statistical text-generation to multi-modal deductive, inductive, and abductive clinical reasoning—read the full deep dive on Medium:
-> 👉 **[Fine-Tuning DeepSeek R1 Reasoning on Medical Chain of Thought Dataset](https://medium.com/@anicomanesh/fine-tuning-deepseek-r1-reasoning-on-the-medical-chain-of-thought-dataset-922407121cc2)**
+Fine-tuning pipeline for DeepSeek-R1-Distill-Qwen-7B on medical chain-of-thought datasets, optimized for constrained GPU environments.
 
 ---
 
 ## 🏗️ Architecture & Deep Technical Decisions
 
 ### 1. Raw Token Binding vs. Standard Chat Dictionaries
-Standard fine-tuning pipelines often map datasets directly into abstract multi-turn chat templates (e.g., standard `Llama-3.1` or `Qwen` chat structural dictionaries). For distilled reasoning models like DeepSeek-R1, this approach breaks down. 
 
-DeepSeek-R1 models rely heavily on recognizing exact structural prompt boundaries to correctly execute internal reasoning traces. This pipeline implements a precise raw token mapping structure via a deterministic string binding layout:
+Standard fine-tuning pipelines map datasets into abstract multi-turn chat templates (e.g., Llama-3.1 or Qwen chat structures). For distilled reasoning models like DeepSeek-R1, this approach breaks down.
 
-```text
-Below is an instruction that describes a task, paired with an input that provides further context. 
-Write a response that appropriately completes the request. Before answering, think carefully about the question 
-and create a step-by-step chain of thoughts to ensure a logical and accurate response.
+DeepSeek-R1 models rely on recognizing exact structural prompt boundaries to execute internal reasoning traces correctly. This pipeline implements precise raw token mapping via a deterministic string binding layout:
 
-### Instruction:
-You are a medical expert with advanced knowledge in clinical reasoning, diagnostics, and treatment planning. 
-Please answer the following medical question. 
-
-### Question:
-{Question} 
-
-### Response:
-<think>
-{Complex_CoT}
-</think>
-{Response}<｜end▁of▁sentence｜>
-
+```python
+TRAIN_PROMPT_STYLE = (
+    "Below is an instruction that describes a task, paired with an input that provides further context. "
+    "Write a response that appropriately completes the request. Before answering, think carefully about the question "
+    "and create a step-by-step chain of thoughts to ensure a logical and accurate response."
+    "\n\n### Instruction:\n"
+    "You are a medical expert with advanced knowledge in clinical reasoning, diagnostics, and treatment planning. "
+    "Please answer the following medical question. \n\n"
+    "### Question:\n{} \n\n"
+    "### Response:\n"
+    "\n{}\n\n{}"
+)
 ```
 
 * **Eliminating Paradigm Drift:** By embedding the `<think>` and `</think>` boundaries explicitly during data processing, we force the weight updates to respect the absolute segregation between the internal clinical monologue (`Complex_CoT`) and the final actionable diagnostic answer (`Response`).
