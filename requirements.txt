@@ -1,0 +1,17 @@
+# Core Architecture & Compilation Engines
+unsloth @ git+https://github.com/unslothai/unsloth.git
+transformers @ git+https://github.com/huggingface/transformers.git
+vllm==0.8.5.post1
+
+# Mathematical & Deep Learning Runtimes
+torch
+trl
+peft
+accelerate
+datasets
+bitsandbytes
+PyYAML
+
+# MLOps, Tracking, and Gateways
+wandb
+huggingface_hub
