@@ -31,3 +31,7 @@ TRAIN_PROMPT_STYLE = (
     "### Response:\n"
     "<think>\n{}\n</think>\n{}"
 )
+
+- Eliminating Paradigm Drift: By embedding the <think> and </think> boundaries explicitly during data processing, we force the weight updates to respect the absolute segregation between the internal clinical monologue (Complex_CoT) and the final actionable diagnostic answer (Response).
+
+- Enforcing Strict Termination: Hardcoding the tokenizer.eos_token (<｜end▁of▁sentence｜>) right after the output text prevents the model from generating trailing hallucinations or infinitely looping across long contexts during inference.
